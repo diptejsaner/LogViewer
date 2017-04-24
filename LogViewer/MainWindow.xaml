@@ -1,0 +1,170 @@
+﻿<Window x:Class="LogViewer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:LogViewer"
+    Title="LogViewer" Height="500" Width="800">
+
+    <Window.Resources>
+        <Style TargetType="ListView" x:Key="LogViewerStyle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <ScrollViewer CanContentScroll="True">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Here only index and time will have auto width i.e. content wrap but the log msg will take as much width as required -->
+        <DataTemplate DataType="{x:Type local:LogEntry}">
+            <Grid IsSharedSizeScope="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="Index" Width="Auto"/>
+                    <ColumnDefinition SharedSizeGroup="Time" Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Index}" Grid.Column="0"
+                       FontWeight="Bold" Margin="2,0,2,0" />
+
+                <TextBlock Text="{Binding Time}" Grid.Column="1"
+                       FontWeight="Bold" Margin="5,0,5,0"/>
+
+                <TextBlock Text="{Binding Message}" Grid.Column="2"
+                       TextWrapping="Wrap"/>
+            </Grid>
+        </DataTemplate>
+
+        <!--<DataTemplate DataType="{x:Type local:CollapsibleLogEntry}">
+            <Grid IsSharedSizeScope="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="Index" Width="Auto"/>
+                    <ColumnDefinition SharedSizeGroup="Time" Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="{Binding Index}" Grid.Column="0"
+                       FontWeight="Bold" Margin="0,0,2,0" />
+
+                <TextBlock Text="{Binding Time}" Grid.Column="1"
+                       FontWeight="Bold" Margin="5,0,5,0"/>
+
+                <TextBlock Text="{Binding Message}" Grid.Column="2"
+                       TextWrapping="Wrap"/>
+
+                <ToggleButton x:Name="Expander" Grid.Row="1" Grid.Column="0"
+                          VerticalAlignment="Top" Content="+" HorizontalAlignment="Right"/>
+
+                <ListView ItemsSource="{Binding Contents}" Style="{StaticResource LogViewerStyle}"
+                          Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                          x:Name="Contents" Visibility="Collapsed"/>
+            </Grid>
+            <DataTemplate.Triggers>
+                <Trigger SourceName="Expander" Property="IsChecked" Value="True">
+                    <Setter TargetName="Contents" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="Expander" Property="Content" Value="-"/>
+                </Trigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>-->
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- <TextBlock Text="{Binding Count, StringFormat='{}{0} Items'}" Grid.Row="0" Grid.ColumnSpan="2"/> -->
+        <Menu Grid.ColumnSpan="2" Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Header="_Open File 1" Click="MenuItem_Open_Click" />
+                <MenuItem Header="_Open File 2" Click="MenuItem_Open_Click" />
+                <MenuItem Header="_Open Folder" Click="MenuItem_Open_Folder_Click" />
+                <MenuItem Header="_Save" />
+                <Separator />
+                <MenuItem Header="_Exit" Click="MenuItem_Exit_Click" />
+            </MenuItem>
+        </Menu>
+
+        <DockPanel Grid.ColumnSpan="2" Grid.Row="1">
+            <CheckBox IsChecked="True" DockPanel.Dock="Left" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" Width="auto" Height="auto">MultiView</CheckBox>
+            <Button x:Name="treeviewButton" Margin="40, 0, 0, 0" DockPanel.Dock="Left" Width="Auto" Content="Tree View" Click="treeviewButton_Click" />
+            <Button x:Name="SearchButton"  DockPanel.Dock="Right" Width="111" Content="Search" HorizontalAlignment="Right" Click="SearchButton_Click"/>
+            <TextBox x:Name="SearchTextBox"  DockPanel.Dock="Right" TextWrapping="Wrap" Width="136" Grid.Column="1" Height="20" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        </DockPanel>
+
+        <ListView Name="Log1" ItemsSource="{Binding}" Style="{StaticResource LogViewerStyle}" HorizontalContentAlignment="Stretch"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                SelectionChanged="Log1_SelectionChanged" Grid.Row="2" Grid.Column="0">
+            <ListView.Template>
+                <ControlTemplate>
+                    <ScrollViewer CanContentScroll="True">
+                        <ItemsPresenter/>
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ListView.Template>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Name="vsp" IsItemsHost="True"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+
+        <ListView Name="Log2" ItemsSource="{Binding}" Style="{StaticResource LogViewerStyle}" HorizontalContentAlignment="Stretch"
+                  SelectionChanged="Log1_SelectionChanged"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="2" Grid.Column="1">
+            <ListView.Template>
+                <ControlTemplate>
+                    <ScrollViewer CanContentScroll="True">
+                        <ItemsPresenter/>
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ListView.Template>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel IsItemsHost="True"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+
+        <Grid Grid.ColumnSpan="2" Grid.ZIndex="1"  Grid.Row="3">
+            <ListView Name="searchResultsListview" ItemsSource="{Binding}" Style="{StaticResource LogViewerStyle}" HorizontalContentAlignment="Stretch"
+                  ScrollViewer.HorizontalScrollBarVisibility="Visible" Visibility="Collapsed" Grid.Row="2" Grid.Column="1">
+                <ListView.Template>
+                    <ControlTemplate>
+                        <ScrollViewer CanContentScroll="True">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ListView.Template>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+            </ListView>
+        </Grid>
+    </Grid>
+</Window>
